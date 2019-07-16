@@ -2,7 +2,7 @@
 A New version of Python3 P2P botnet, old version: http://github.com/Leeon123/Python3-botnet
 
 ***PLS Don't scan the executable file generated from pyinstaller or py2exe in any virtual scanner(such as VirtualTotal), if you want to keep using this project(i will continue update the code) and not be detected*** 
-# News&Features
+## News&Features
 **BOT:**
 - [x] Added Slowloris attack
 - [x] Improved attack process
