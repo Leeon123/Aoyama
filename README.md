@@ -1,4 +1,4 @@
-# Aoyama
+# Aoyama ![](https://img.shields.io/badge/Version-1.0-brightgreen.svg)  ![](https://img.shields.io/badge/license-GPL2.0-green.svg)
 Aoyama is a New version of Python3 P2P botnet, old version: http://github.com/Leeon123/Python3-botnet
 
 Aoyama is for ddos(Maybe add more function later, maybe...keylogger?)
