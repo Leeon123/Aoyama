@@ -6,6 +6,8 @@ Aoyama is for ddos(Maybe add more function later, maybe...keylogger?)
 ***PLS Don't scan the executable file generated from pyinstaller or py2exe on any virus scanner(such as VirusTotal), if you want to keep using this project(i will continue update the code) and not be detected*** 
 
 **Plese run the cnc.py in linux, run in windows will have bug when login to cnc(idk why but i will try to fix it)**
+
+**Test video: https://www.youtube.com/watch?v=W4YR-cf3xD0**
 ## News&Features
 **BOT:**
 - [x] Added Slowloris attack
