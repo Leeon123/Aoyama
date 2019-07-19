@@ -28,7 +28,7 @@ Aoyama is for ddos(Maybe add more function later, such as...keylogger?)
 - [x] Using 'ping/pong' to check bot connection status(use 'scan' to check it by yourself or it checks every min.)
 
 ## Opinion:
-In my optinion, best way is using **python v3.4.3** and **pyinstaller v3.2**. They are the best pattern i tested and used.
+In my opinion, best way is using **python v3.4.3** and **pyinstaller v3.2**. They are the best pattern i tested and used.
 
 ## Usage:
 ***Change*** the cnc server ip and port into the client.py **at first**.
