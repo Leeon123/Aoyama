@@ -10,6 +10,8 @@ Aoyama is for ddos(Maybe add more function later, such as...keylogger?)
 **Plese run the cnc.py in linux, run in windows will have bug when login to cnc(idk why but i will try to fix it)**
 
 **Test video(OLD): https://www.youtube.com/watch?v=W4YR-cf3xD0**
+
+[Virustotal (Old)](https://www.virustotal.com/gui/file/4d4ef809d67cd70708567527e48540fdce61d76f0034b774396130612e17e0da/detection)
 ## News&Features
 **BOT(V2):**
 - [x] **Added Port Scanner**
