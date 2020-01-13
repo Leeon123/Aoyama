@@ -719,7 +719,7 @@ def gip():
 		return ip
 
 if __name__ == '__main__':
-	#time.sleep(30+random.randint(0,60))
+	time.sleep(30+random.randint(0,60))
 	conn()
 '''
                                       ~ 神は死んだ ~
