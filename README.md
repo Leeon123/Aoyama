@@ -51,10 +51,11 @@ then the **Bot** is online.
 
 ***To login cnc***, using **telnet(Updated after v2)** connect it then
 
-click enter key will show the login parameters
+It should be show like this:
 
         Username:
-At this moment, u should create a text called login.txt and input the username and password in it
+        
+At this moment, u should create a file called login.txt and input the username and password in it
 
 Like this:
 
