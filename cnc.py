@@ -299,7 +299,7 @@ def main(rlock):
 	s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)#Keepalive tcp connection
 	s.bind(('0.0.0.0',b))
 	s.listen(1024)
-	while True:
+	while 1:
 		sock, addr = s.accept()
 		threading.Thread(target=Verify,args=(sock,addr,rlock,),daemon=True).start()
 
@@ -341,5 +341,10 @@ if __name__ == '__main__':
 	rlock = threading.Lock()
 	threading.Thread(target=main,args=(rlock,),daemon=True).start()
 	while 1:
-		if shutdown:
-			sys.exit()
+		try:
+			time.sleep(0.1)
+			if shutdown:
+				sys.exit()
+		except KeyboardInterrupt:
+			break
+		
