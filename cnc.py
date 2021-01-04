@@ -34,7 +34,7 @@ key= "asdfghjkloiuytresxcvbnmliuytf"#xor key
 def ReadSocket(sock,length):
 	data = ""
 	while data == "":
-		data += sock.recv(length).decode().strip()
+		data += sock.recv(length).decode(errors='ignore').strip()#quick fix
 	return data
 
 def ReadLine(sock,length):
