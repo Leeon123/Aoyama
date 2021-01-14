@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 #Code by LeeOn123
 #Created at 16/7/2019
-#Updaed at 20/11/2020
+#Updaed at 14/1/2021
 #############################################################
 #        d8888                                              #
 #       d88888                                              #
@@ -68,7 +68,7 @@ def SendCmd(cmd,so,rlock):#Send Commands Module
 	dead = 0
 	th_list = []
 	for sock in socketList:
-		th = threading.Thread(target=SentCmd,args=(count,dead,data,sock,rlock,))
+		th = threading.Thread(target=SentCmd,args=(data,sock,rlock,))
 		th.start()
 		th_list.append(th)
 	for th in th_list:
