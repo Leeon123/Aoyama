@@ -32,7 +32,7 @@ Aoyama is for ddos(Maybe add more function later, such as...keylogger?)
 - [x] Coloured CNC
 - [x] Using login.txt to check account.(Need improve, sometime may have bugs)
 - [x] Keep-alive connection
-- [x] Using putty raw-mode login(on windows) and telnet(on linux)
+- [x] Using telnet to connect
 - [x] Using 'ping/pong' to check bot connection status(use 'scan' to check it by yourself or it checks every **15 seconds**.)
 
 ## Opinion:
