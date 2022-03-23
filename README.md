@@ -67,3 +67,8 @@ After that, Just input ur username and password.
             Username:Leeon123
             Password:test
             
+---
+
+Credits:
+ - [Leeon123](https://github.com/Leeon123), writing the botnet
+ - [Nexus](https://github.com/Nexuzzzz), adding more methods
